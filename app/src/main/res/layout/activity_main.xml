@@ -30,7 +30,7 @@
         app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
     <ImageView
-        android:id="@+id/PreviewImage"
+        android:id="@+id/iv_video"
         android:layout_width="300dp"
         android:layout_height="283dp"
         android:layout_marginTop="15dp"
@@ -49,7 +49,7 @@
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/PreviewImage" />
+        app:layout_constraintTop_toBottomOf="@+id/iv_video" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
