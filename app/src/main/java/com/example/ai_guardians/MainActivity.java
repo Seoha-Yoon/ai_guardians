@@ -2,7 +2,10 @@ package com.example.ai_guardians;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -104,11 +107,14 @@ public class MainActivity extends AppCompatActivity {
                 String result = null;
                 try {
                     result = body.string();
-                    tv.setText(result);
+                    //tv.setText(result);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                byte[] byteArray = Base64.decode(result, Base64.DEFAULT);
 
+                Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+                iv.setImageBitmap(bitmap);
             }
             @Override
             public void onFailure (Call < ResponseBody > call, Throwable t){
