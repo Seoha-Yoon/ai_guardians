@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
         // imageView에 폭력작면 frame 받아오기
         // getImage();
-        showVideo();
+        // showVideo();
 
         // 신고 버튼
         btn_yes.setOnClickListener(new View.OnClickListener() {
@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 // video 보여주기
-                //showVideo();
+                showVideo();
             }
             @Override
             public void onFailure (Call < ResponseBody > call, Throwable t){
@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
     private void showVideo(){
 
 
-        Uri videoUri= Uri.parse("http://10.0.2.2:8000/static/video/reference.mp4");
+        Uri videoUri= Uri.parse("http://10.0.2.2:8000/media/video/21/ai_sh_224.mp4");
 
         //비디오뷰의 재생, 일시정지 등을 할 수 있는 '컨트롤바'를 붙여주는 작업
         vv.setMediaController(new MediaController(this));
