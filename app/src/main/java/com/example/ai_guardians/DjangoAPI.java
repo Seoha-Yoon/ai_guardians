@@ -11,6 +11,6 @@ public interface DjangoAPI {
 
     String DJANGO_SITE="http://10.0.2.2:8000";
 
-    @POST("guardians_of_children/video")
-    Call <ResponseBody> uploadFile();
+    @POST("guardians_of_children/violence")
+    Call <ResponseBody> request();
 }

@@ -2,18 +2,25 @@ package com.example.ai_guardians;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -27,7 +34,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
-    ImageView iv;
+    VideoView vv;
     Button btn_yes, btn_no;
     ImageView btn_post;
     TextView tv;
@@ -38,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // layout과 activity 연결
-        iv = findViewById(R.id.iv_video);
+        vv = findViewById(R.id.vv);
         btn_yes = findViewById(R.id.btn_yes);
         btn_no = findViewById(R.id.btn_no);
         btn_post = findViewById(R.id.btn_post);
@@ -46,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
         // imageView에 폭력작면 frame 받아오기
         // getImage();
+        showVideo();
 
         // 신고 버튼
         btn_yes.setOnClickListener(new View.OnClickListener() {
@@ -92,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
 
         DjangoAPI postApi= retrofit.create(DjangoAPI.class);
 
-        Call<ResponseBody> call = postApi.uploadFile();
+        Call<ResponseBody> call = postApi.request();
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
@@ -103,18 +111,18 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 ResponseBody body = response.body();
+                Log.d("Type",body.contentType().toString());
 
                 String result = null;
                 try {
                     result = body.string();
-                    //tv.setText(result);
+                    tv.setText(result);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                byte[] byteArray = Base64.decode(result, Base64.DEFAULT);
 
-                Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-                iv.setImageBitmap(bitmap);
+                // video 보여주기
+                //showVideo();
             }
             @Override
             public void onFailure (Call < ResponseBody > call, Throwable t){
@@ -125,8 +133,42 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void showVideo(){
 
-    private void getImage(){
 
+        Uri videoUri= Uri.parse("http://10.0.2.2:8000/static/video/reference.mp4");
+
+        //비디오뷰의 재생, 일시정지 등을 할 수 있는 '컨트롤바'를 붙여주는 작업
+        vv.setMediaController(new MediaController(this));
+
+        //VideoView가 보여줄 동영상의 경로 주소(Uri) 설정하기
+        vv.setVideoURI(videoUri);
+
+        //동영상을 읽어오는데 시간이 걸리므로..
+        //비디오 로딩 준비가 끝났을 때 실행하도록..
+        //리스너 설정
+        vv.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mediaPlayer) {
+                //비디오 시작
+                vv.start();
+            }
+        });
+    }
+
+    //화면에 안보일때...
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        //비디오 일시 정지
+        if(vv!=null && vv.isPlaying()) vv.pause();
+    }
+    //액티비티가 메모리에서 사라질때..
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //
+        if(vv!=null) vv.stopPlayback();
     }
 }
