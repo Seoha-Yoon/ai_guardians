@@ -1,14 +1,15 @@
 package com.example.ai_guardians;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -19,12 +20,9 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
-import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
@@ -39,6 +37,12 @@ public class MainActivity extends AppCompatActivity {
     ImageView btn_post;
     TextView tv;
 
+    // Test 용 Notification
+    // channel에 대한 id 생성
+    private static final String PRIMARY_CHANNEL_ID = "noti_channel";
+    private NotificationManager mNotificationManager;
+    private static final int NOTIFICATION_ID = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
         btn_yes = findViewById(R.id.btn_yes);
         btn_no = findViewById(R.id.btn_no);
         btn_post = findViewById(R.id.btn_post);
-        tv = findViewById(R.id.percentage);
+        tv = findViewById(R.id.result);
 
         // imageView에 폭력작면 frame 받아오기
         // getImage();
@@ -80,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
                 sendpost();
             }
         });
+
+        createNotificationChannel();
     }
 
     private void sendpost(){
@@ -121,6 +127,8 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
+                // 알림 전송
+                sendNotification();
                 // video 보여주기
                 showVideo();
             }
@@ -144,8 +152,6 @@ public class MainActivity extends AppCompatActivity {
         //VideoView가 보여줄 동영상의 경로 주소(Uri) 설정하기
         vv.setVideoURI(videoUri);
 
-        //동영상을 읽어오는데 시간이 걸리므로..
-        //비디오 로딩 준비가 끝났을 때 실행하도록..
         //리스너 설정
         vv.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
@@ -156,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    //화면에 안보일때...
+    //화면에 안보일 때
     @Override
     protected void onPause() {
         super.onPause();
@@ -164,11 +170,44 @@ public class MainActivity extends AppCompatActivity {
         //비디오 일시 정지
         if(vv!=null && vv.isPlaying()) vv.pause();
     }
-    //액티비티가 메모리에서 사라질때..
+    //액티비티가 메모리에서 사라질 때
     @Override
     protected void onDestroy() {
         super.onDestroy();
         //
         if(vv!=null) vv.stopPlayback();
     }
+
+    // channel 만드는 메소드
+    public void createNotificationChannel(){
+        mNotificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            NotificationChannel notificationChannel = new NotificationChannel(PRIMARY_CHANNEL_ID, "notification",
+                    mNotificationManager.IMPORTANCE_HIGH);
+            notificationChannel.enableLights(true);
+            notificationChannel.setLightColor(Color.RED);
+            notificationChannel.enableVibration(true);
+            notificationChannel.setDescription("detect violence");
+            mNotificationManager.createNotificationChannel(notificationChannel);
+        }
+    }
+
+    // Notification Builder 만들기
+    private NotificationCompat.Builder getNotificationBuilder(){
+        NotificationCompat.Builder notifyBuilder = new NotificationCompat.Builder(this, PRIMARY_CHANNEL_ID)
+                .setContentTitle("알림")
+                .setContentText("폭력이 감지되었습니다")
+                .setSmallIcon(R.drawable.notification);
+        return notifyBuilder;
+    }
+
+    // Notification 보내는 메소드
+    public void sendNotification(){
+        // builder 생성
+        NotificationCompat.Builder notifyBuilder = getNotificationBuilder();
+        mNotificationManager.notify(NOTIFICATION_ID,notifyBuilder.build());
+    }
+
+
 }
